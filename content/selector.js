@@ -1,51 +1,65 @@
 const CSS_CLASS_NAME = 'userforce_chrome_selector_picker';
 const CSS_CLASS_STYLES = '.' + CSS_CLASS_NAME + '{-webkit-box-shadow: 0px 0px 0px 1px rgba(96,143,61,1); box-shadow: 0px 0px 0px 1px rgba(96,143,61,1);}'
 
-var current_element = null;
-var result = null;
+var tc_styles_element = null;
+var tc_current_element = null;
+var tc_mouse_move_listener = null;
+var tc_contextmenu_listener = null;
+var tc_result = null;
 
-var addCssClassToTheDOM = function() {
+// Add extension CSS to the DOM.
+var addCss = function() {
     var headElement = document.querySelector('head'),
-        style = document.createElement('style');
-    style.type = 'text/css';
-    style.appendChild(document.createTextNode(CSS_CLASS_STYLES));
-    headElement.appendChild(style);
+        styles = document.createElement('style');
+    styles.type = 'text/css';
+    styles.appendChild(document.createTextNode(CSS_CLASS_STYLES));
+    tc_styles_element = headElement.appendChild(styles);
 };
 
-var prepareElementSelecting = function() {
-    document.addEventListener('mousemove', function(e) {
-        if(e.srcElement !== current_element && e.srcElement.tagName.toLowerCase() != 'html') {
-            if (current_element != null) current_element.classList.remove(CSS_CLASS_NAME);
-            current_element = e.srcElement;
-            current_element.classList.add(CSS_CLASS_NAME);
+var removeCss = function() {
+    if (!!tc_current_element) tc_current_element.classList.remove(CSS_CLASS_NAME);
+    tc_styles_element.remove();
+};
+
+// Then we are going to listen for the mouse move in currently open tab.
+// Here we will add specific css styles to visualy detect hovered element
+// and remember that element.
+var showSelectedElement = function() {
+    tc_mouse_move_listener = document.addEventListener('mousemove', function(e) {
+        if(e.srcElement !== tc_current_element && e.srcElement.tagName.toLowerCase() != 'html') {
+            if (tc_current_element != null) tc_current_element.classList.remove(CSS_CLASS_NAME);
+            tc_current_element = e.srcElement;
+            tc_current_element.classList.add(CSS_CLASS_NAME);
         }
     }, false);
 };
 
-var copyRequested = function(message) {
-    if(message.hasOwnProperty('action')) {
-        return message.action === 'COPY_SELECTOR';
-    }
-    return false;
+var hideSelectedElement = function() {
+    document.removeEventListener('mousemove', tc_mouse_move_listener);
 };
 
-var prepareContextMenuActions = function() {
-    chrome.runtime.onMessage.addListener(
-        function(message, sender, sendResponse) {
-            if(copyRequested(message)) {
-                result = findCurrentElementSelector().trim(' ');
-                console.log(result);
-            }
-            // Chrome is expecting a response and throwing and error if
-            // it was not received so we just send a boolean true back.
-            sendResponse(true);
-        }
-    );
+var isActionRequested = function(message, action) {
+    return message.action === action;
+};
+
+var isContextMenuAction = function(message) {
+    return message.hasOwnProperty('action');
+}
+
+var runContextMenuAction = function(message) {
+    var attempts = 5, attempts_counter = 0;
+    if(isActionRequested(message, 'tc_cm_id_copy')) {
+
+    }
+    if (isActionRequested(message, 'tc_cm_id_save')) {
+
+    }
+    console.log(findCurrentElementSelector().trim(' '));
 };
 
 var findCurrentElementSelector = function(children = '') {
-    if(!!current_element.id) return ('#' + current_element.id + children);
-    return detectNodeSelector(current_element);
+    if(!!tc_current_element.id) return ('#' + tc_current_element.id + children);
+    return detectNodeSelector(tc_current_element);
 };
 
 var detectNodeSelector = function(element, selector = '') {
@@ -96,16 +110,29 @@ var findElementClassSelector = function(element) {
     return classSelector;
 }
 
-var initSelector = function() {
-    // Add extension CSS class to the DOM tree.
-    addCssClassToTheDOM();
-    // Then we are going to listen for the mouse move in currently open tab.
-    // Here we will add specific css styles to visualy detect hovered element
-    // and remember that element.
-    prepareElementSelecting();
-    // Copy current_element selector to the clipboard or remember it by saving
-    // to the chrome storage.
-    prepareContextMenuActions();
+var start = function() {
+    showSelectedElement();
+    addCss();
 }
 
-initSelector();
+var stop = function() {
+    hideSelectedElement();
+    removeCss();
+}
+
+chrome.runtime.onMessage.addListener(
+    function(message, sender, sendResponse) {
+        if (message.hasOwnProperty('app')) {
+            message.app.isRunning ? start() : stop();
+        }
+        if (isContextMenuAction(message)) {
+            // Copy tc_current_element selector to the clipboard or remember it
+            // by saving to the chrome storage.
+            runContextMenuAction(message);
+        }
+        // Chrome is expecting a response and throwing and error if
+        // it was not received so we just send a boolean true back.
+        sendResponse(true);
+        return true;
+    }
+);
