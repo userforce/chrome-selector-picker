@@ -1,0 +1,33 @@
+{
+    "name": "Element Selector",
+    "version": "1.0",
+    "description": "Detect and store element css selector.",
+    "manifest_version": 2,
+    "permissions": [
+        "http://*/*",
+        "https://*/*",
+        "contextMenus",
+        "activeTab"
+    ],
+    "background": {
+        "scripts": [
+            "background/background.js"
+        ]
+    },
+    "browser_action": {},
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content/selector.js"
+            ]
+        }
+    ],
+    "icons": {
+        "16": "src/img/icon16.png",
+        "48": "src/img/icon48.png",
+        "128": "src/img/icon128.png"
+    }
+}
