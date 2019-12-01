@@ -39,8 +39,21 @@ var toggleSelector = function(tab) {
     refrashIcons();
 }
 
+var refrashSelector = function(tab) {
+    stop(tab);
+    if(active) {
+        run(tab);
+        chrome.tabs.sendMessage(tab.id, {app: {isRunning: active}}, function(response){});
+    }
+    refrashIcons();
+};
+
 refrashIcons();
 
 chrome.browserAction.onClicked.addListener(function (tab) {
     toggleSelector(tab);
 });
+
+chrome.tabs.onUpdated.addListener( function (tabId, changeInfo, tab) {
+    if (changeInfo.status == 'complete') refrashSelector(tab);
+})

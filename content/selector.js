@@ -3,6 +3,7 @@ const CSS_CLASS_STYLES = '.' + CSS_CLASS_NAME + '{-webkit-box-shadow: 0px 0px 0p
 
 var tc_styles_element = null;
 var tc_current_element = null;
+var tc_highlighted_element = null;
 var tc_mouse_move_listener = null;
 var tc_contextmenu_listener = null;
 var tc_result = null;
@@ -17,25 +18,39 @@ var addCss = function() {
 };
 
 var removeCss = function() {
-    if (!!tc_current_element) tc_current_element.classList.remove(CSS_CLASS_NAME);
-    tc_styles_element.remove();
+    if (!!tc_highlighted_element) {
+        tc_highlighted_element.classList.remove(CSS_CLASS_NAME);
+        tc_highlighted_element.remove();
+    }
 };
 
 // Then we are going to listen for the mouse move in currently open tab.
 // Here we will add specific css styles to visualy detect hovered element
 // and remember that element.
 var showSelectedElement = function() {
-    tc_mouse_move_listener = document.addEventListener('mousemove', function(e) {
-        if(e.srcElement !== tc_current_element && e.srcElement.tagName.toLowerCase() != 'html') {
-            if (tc_current_element != null) tc_current_element.classList.remove(CSS_CLASS_NAME);
-            tc_current_element = e.srcElement;
-            tc_current_element.classList.add(CSS_CLASS_NAME);
+    tc_mouse_move_listener = function(e) {
+        if(e.srcElement !== tc_highlighted_element && e.srcElement.tagName.toLowerCase() != 'html') {
+            if (tc_highlighted_element != null) tc_highlighted_element.classList.remove(CSS_CLASS_NAME);
+            tc_highlighted_element = e.srcElement;
+            tc_highlighted_element.classList.add(CSS_CLASS_NAME);
         }
-    }, false);
+    };
+    document.addEventListener('mousemove', tc_mouse_move_listener, false);
 };
 
 var hideSelectedElement = function() {
     document.removeEventListener('mousemove', tc_mouse_move_listener);
+};
+
+var setCurrentElement = function() {
+    tc_contextmenu_listener = function(e) {
+        tc_current_element = e.srcElement;
+    };
+    document.addEventListener('contextmenu', tc_contextmenu_listener, false);
+};
+
+var removeCurrentElement = function() {
+    document.removeEventListener('mousemove', tc_contextmenu_listener);
 };
 
 var isActionRequested = function(message, action) {
@@ -47,7 +62,6 @@ var isContextMenuAction = function(message) {
 }
 
 var runContextMenuAction = function(message) {
-    var attempts = 5, attempts_counter = 0;
     if(isActionRequested(message, 'tc_cm_id_copy')) {
 
     }
@@ -55,6 +69,7 @@ var runContextMenuAction = function(message) {
 
     }
     console.log(findCurrentElementSelector().trim(' '));
+    console.log('---------------------------');
 };
 
 var findCurrentElementSelector = function(children = '') {
@@ -111,11 +126,13 @@ var findElementClassSelector = function(element) {
 }
 
 var start = function() {
+    setCurrentElement();
     showSelectedElement();
     addCss();
 }
 
 var stop = function() {
+    removeCurrentElement();
     hideSelectedElement();
     removeCss();
 }
