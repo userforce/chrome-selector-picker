@@ -1,7 +1,12 @@
 const CSS_CLASS_NAME = 'userforce_chrome_selector_picker';
-const CSS_CLASS_STYLES = '.' + CSS_CLASS_NAME + '{-webkit-box-shadow: 0px 0px 0px 1px rgba(96,143,61,1); box-shadow: 0px 0px 0px 1px rgba(96,143,61,1);}'
+const CSS_RESOURCE_FILE = chrome.runtime.getURL("resources/css/panel.css");
+const CSS_ELEMENT_KEY = 'tc_panel_css';
+const HTML_TEMPLATE_PANEL = chrome.runtime.getURL("resources/html/panel.html");
+const CSS_ELEMENT_PANEL_KEY = 'tc_panel_element';
 
 var tc_styles_element = null;
+
+var embedded = {};
 var tc_current_element = null;
 var tc_highlighted_element = null;
 var tc_mouse_move_listener = null;
@@ -10,18 +15,14 @@ var tc_result = null;
 
 // Add extension CSS to the DOM.
 var addCss = function() {
-    var headElement = document.querySelector('head'),
-        styles = document.createElement('style');
-    styles.type = 'text/css';
-    styles.appendChild(document.createTextNode(CSS_CLASS_STYLES));
-    tc_styles_element = headElement.appendChild(styles);
+    embedFromResources(CSS_RESOURCE_FILE, 'style', 'head', CSS_ELEMENT_KEY);
 };
 
 var removeCss = function() {
     if (!!tc_highlighted_element) {
         tc_highlighted_element.classList.remove(CSS_CLASS_NAME);
-        tc_highlighted_element.remove();
     }
+    removeEmbdded(CSS_ELEMENT_KEY);
 };
 
 // Then we are going to listen for the mouse move in currently open tab.
@@ -30,9 +31,11 @@ var removeCss = function() {
 var showSelectedElement = function() {
     tc_mouse_move_listener = function(e) {
         if(e.srcElement !== tc_highlighted_element && e.srcElement.tagName.toLowerCase() != 'html') {
-            if (tc_highlighted_element != null) tc_highlighted_element.classList.remove(CSS_CLASS_NAME);
-            tc_highlighted_element = e.srcElement;
-            tc_highlighted_element.classList.add(CSS_CLASS_NAME);
+            if ( !e.srcElement.classList.contains('tc_ignore_highlighting')) {
+                if (tc_highlighted_element != null) tc_highlighted_element.classList.remove(CSS_CLASS_NAME);
+                tc_highlighted_element = e.srcElement;
+                tc_highlighted_element.classList.add(CSS_CLASS_NAME);
+            }
         }
     };
     document.addEventListener('mousemove', tc_mouse_move_listener, false);
@@ -61,16 +64,25 @@ var isContextMenuAction = function(message) {
     return message.hasOwnProperty('action');
 }
 
+
+
+
+
+
 var runContextMenuAction = function(message) {
     if(isActionRequested(message, 'tc_cm_id_copy')) {
 
     }
     if (isActionRequested(message, 'tc_cm_id_save')) {
-
+        
     }
-    console.log(findCurrentElementSelector().trim(' '));
-    console.log('---------------------------');
 };
+
+
+
+
+
+
 
 var findCurrentElementSelector = function(children = '') {
     if(!!tc_current_element.id) return ('#' + tc_current_element.id + children);
@@ -125,13 +137,42 @@ var findElementClassSelector = function(element) {
     return classSelector;
 }
 
+var embedFromResources = function(template_path, element, parentSelector, key) {
+    var parentElement = document.querySelector(parentSelector);
+    fetch(template_path).then(
+        function(response) {
+          response.text().then(function(data) {
+              var panel_template = document.createElement(element);
+              panel_template.innerHTML = data;
+              embedded[key] = parentElement.appendChild(panel_template);
+          })
+        }
+    );
+};
+
+var removeEmbdded = function(key) {
+    if (embedded.hasOwnProperty(key)) {
+        embedded[key].remove();
+    }
+};
+
+var addPanel = function() {
+    embedFromResources(HTML_TEMPLATE_PANEL, 'div', 'body', CSS_ELEMENT_PANEL_KEY);
+};
+
+var removePanel = function() {
+    removeEmbdded(CSS_ELEMENT_PANEL_KEY);
+};
+
 var start = function() {
+    addPanel();
     setCurrentElement();
     showSelectedElement();
     addCss();
 }
 
 var stop = function() {
+    removePanel();
     removeCurrentElement();
     hideSelectedElement();
     removeCss();

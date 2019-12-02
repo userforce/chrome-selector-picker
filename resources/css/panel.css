@@ -1,0 +1,32 @@
+.userforce_chrome_selector_picker {
+    -webkit-box-shadow: 0px 0px 0px 1px rgba(96,143,61,1);
+    box-shadow: 0px 0px 0px 1px rgba(96,143,61,1);
+}
+.tc_panel_wrapper {
+    background: #f8f8f8;
+    padding: 2px;
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    border-top: 1px solid #cccccc;
+    border-left: 1px solid #cccccc;
+    color: #555555;
+    z-index: 5000;
+}
+.tc_panel_template {
+    padding: 5px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+.tc_panel_copy_button {
+    background: #f1f1f1;
+    border: 1px solid #cccccc;
+    cursor: pointer;
+    padding: 5px 10px;
+}
+.tc_panel_copy_button:hover {
+    background: white;
+}
+#tc_panel_template{
+
+}
