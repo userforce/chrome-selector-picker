@@ -67,10 +67,8 @@ var isContextMenuAction = function(message) {
 var copyToClipboard = function (value) {
     navigator.permissions.query({name: "clipboard-write"}).then(result => {
         if (result.state == "granted" || result.state == "prompt") {
-            navigator.clipboard.writeText(value).then(function() {
-
-            }, function() {
-
+            navigator.clipboard.writeText(value).then(function() {}, function() {
+                console.error("Can't copy to the clipboard. Save your selector instead. Thank You!")
             });
         }
     });

@@ -11,7 +11,7 @@ var refrashIcons = function() {
 };
 
 var menuClick = function(info, tab) {
-    chrome.tabs.sendMessage(tab.id, {action: info.menuItemId}, function(response){});
+    sendMessage(tab, {action: info.menuItemId});
 };
 
 var addContextMenu = function() {
@@ -28,32 +28,32 @@ var addContextMenu = function() {
         id: TC_CONTEXT_MENU_ID_SAVE
     });
     menuListener = chrome.contextMenus.onClicked.addListener(menuClick);
-}
+};
 
 var removeContextMenu = function() {
     chrome.contextMenus.onClicked.removeListener(menuListener);
     chrome.contextMenus.removeAll();
-}
+};
 
 var run = function(tab) {
     addContextMenu();
-}
+};
 
 var stop = function(tab) {
     removeContextMenu();
-}
+};
 
 var toggleSelector = function(tab) {
     (active = !active) ? run(tab) : stop(tab);
-    chrome.tabs.sendMessage(tab.id, {app: {isRunning: active}}, function(response){});
+    sendMessage(tab, {app: {isRunning: active}});
     refrashIcons();
-}
+};
 
 var refrashSelector = function(tab) {
     stop(tab);
     if(active) {
         run(tab);
-        chrome.tabs.sendMessage(tab.id, {app: {isRunning: active}}, function(response){});
+        sendMessage(tab, {app: {isRunning: active}});
     }
     refrashIcons();
 };
@@ -66,4 +66,15 @@ chrome.browserAction.onClicked.addListener(function (tab) {
 
 chrome.tabs.onUpdated.addListener( function (tabId, changeInfo, tab) {
     if (changeInfo.status == 'complete') refrashSelector(tab);
-})
+});
+
+// Wait for content script workaround.
+var sendMessage = function(tab, message) {
+    if(chrome.runtime.lastError) {
+        setTimeout(function() {
+            sendMessage(tab, message);
+        }, 1000);
+    } else {
+        chrome.tabs.sendMessage(tab.id, message, function(response){});
+    }
+};
