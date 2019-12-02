@@ -74,7 +74,10 @@ var runContextMenuAction = function(message) {
 
     }
     if (isActionRequested(message, 'tc_cm_id_save')) {
-        
+        var panel_selector = document.querySelector('.tc_panel_selector');
+        if (!!panel_selector) {
+            panel_selector.innerHTML = findCurrentElementSelector().trim(' ');
+        }
     }
 };
 
