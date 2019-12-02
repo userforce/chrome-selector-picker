@@ -1,0 +1,66 @@
+@import url('https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap');
+.userforce_chrome_selector_picker {
+    -webkit-box-shadow: 0px 0px 0px 1px rgba(96,143,61,1);
+    box-shadow: 0px 0px 0px 1px rgba(96,143,61,1);
+}
+.tc_panel_wrapper {
+    background: #f8f8f8;
+    padding: 2px 5px 2px 2px;
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    border-top: 1px solid #cccccc;
+    border-left: 1px solid #cccccc;
+    color: #555555;
+    z-index: 5000;
+    font-family: 'Ubuntu Mono', monospace;
+    max-height: 70%;
+}
+#tc_panel_content {
+    overflow-y: auto;
+}
+#tc_panel_content.hide {
+    display: none;
+}
+.tc_panel_expand {
+    position: absolute;
+    left: -25px;
+    top: -25px;
+    width: 25px;
+}
+.tc_panel_item {
+    position: relative;
+    padding: 0 0 5px 55px;
+    margin: 0 0 5px 0;
+    min-height: 25px;
+    max-width: 300px;
+    border-bottom: 1px solid #cccccc;
+}
+.tc_panel_copy_button {
+    background: #f1f1f1;
+    border: 1px solid #cccccc;
+    cursor: pointer;
+    padding: 0;
+    text-align: center;
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 50px;
+    height: 25px;
+    line-height: 22px;
+}
+.tc_panel_copy_button:hover {
+    background: white;
+}
+.tc_panel_selector {
+    display: block;
+    display: block;
+    text-align: left;
+    font-size: 12px;
+    line-height: 14px;
+    min-height: 30px;
+}
+#tc_panel_template{
+    display: none;
+}
