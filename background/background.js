@@ -15,8 +15,18 @@ var menuClick = function(info, tab) {
 };
 
 var addContextMenu = function() {
-    chrome.contextMenus.create({title: "Copy Selector", type: "normal", id: TC_CONTEXT_MENU_ID_COPY});
-    chrome.contextMenus.create({title: "Save Selector", type: "normal", id: TC_CONTEXT_MENU_ID_SAVE});
+    chrome.contextMenus.create({
+        title: "Copy Selector",
+        type: "normal",
+        contexts: ["all"],
+        id: TC_CONTEXT_MENU_ID_COPY
+    });
+    chrome.contextMenus.create({
+        title: "Save Selector",
+        type: "normal",
+        contexts: ["all"],
+        id: TC_CONTEXT_MENU_ID_SAVE
+    });
     menuListener = chrome.contextMenus.onClicked.addListener(menuClick);
 }
 

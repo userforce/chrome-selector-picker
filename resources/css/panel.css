@@ -5,7 +5,7 @@
 }
 .tc_panel_wrapper {
     background: #f8f8f8;
-    padding: 2px 10px 2px 2px;
+    padding: 2px 5px 2px 2px;
     position: fixed;
     right: 0;
     bottom: 0;
@@ -19,18 +19,29 @@
     padding: 5px;
     font-size: 12px;
 }
+.tc_panel_item {
+    position: relative;
+    padding: 0 0 0 55px;
+    min-height: 25px;
+}
 .tc_panel_copy_button {
     background: #f1f1f1;
     border: 1px solid #cccccc;
     cursor: pointer;
-    padding: 5px 10px;
-    display: inline-block;
+    padding: 5px 0;
+    text-align: center;
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 50px;
 }
 .tc_panel_copy_button:hover {
     background: white;
 }
 .tc_panel_selector {
-
+    display: block;
+    text-align: left;
 }
 #tc_panel_template{
 

@@ -62,16 +62,23 @@ var isActionRequested = function(message, action) {
 
 var isContextMenuAction = function(message) {
     return message.hasOwnProperty('action');
-}
+};
 
+var copyToClipboard = function (value) {
+    navigator.permissions.query({name: "clipboard-write"}).then(result => {
+        if (result.state == "granted" || result.state == "prompt") {
+            navigator.clipboard.writeText(value).then(function() {
 
+            }, function() {
 
-
-
+            });
+        }
+    });
+};
 
 var runContextMenuAction = function(message) {
     if(isActionRequested(message, 'tc_cm_id_copy')) {
-
+        copyToClipboard(findCurrentElementSelector().trim(' '));
     }
     if (isActionRequested(message, 'tc_cm_id_save')) {
         var panel_selector = document.querySelector('.tc_panel_selector');
@@ -81,19 +88,15 @@ var runContextMenuAction = function(message) {
     }
 };
 
-
-
-
-
-
-
-var findCurrentElementSelector = function(children = '') {
-    if(!!tc_current_element.id) return ('#' + tc_current_element.id + children);
+var findCurrentElementSelector = function() {
     return detectNodeSelector(tc_current_element);
 };
 
 var detectNodeSelector = function(element, selector = '') {
     elementSelector = '';
+    if(!!tc_current_element.id) {
+        return '#' + tc_current_element.id + selector;
+    }
     if(hasValidParentNode(element)) {
         var parentNode = element.parentNode;
         var orderNumber = findElementOrderNumber(element);
@@ -108,7 +111,7 @@ var detectNodeSelector = function(element, selector = '') {
         selector = detectNodeSelector(element.parentNode, elementSelector);
     }
     return selector;
-}
+};
 
 var hasValidParentNode = function(node) {
     if (!!node.parentNode) {
@@ -127,7 +130,7 @@ var findElementOrderNumber = function(element, order = 0) {
     } else {
         return order === 0 ? order : ++order;
     }
-}
+};
 
 var findElementClassSelector = function(element) {
     var classSelector = '';
@@ -135,10 +138,10 @@ var findElementClassSelector = function(element) {
     for(var index in classes) {
         if(!!classes[index]){
             classSelector += ('.' + classes[index])
-        };
+        }
     }
     return classSelector;
-}
+};
 
 var embedFromResources = function(template_path, element, parentSelector, key) {
     var parentElement = document.querySelector(parentSelector);
@@ -172,14 +175,14 @@ var start = function() {
     setCurrentElement();
     showSelectedElement();
     addCss();
-}
+};
 
 var stop = function() {
     removePanel();
     removeCurrentElement();
     hideSelectedElement();
     removeCss();
-}
+};
 
 chrome.runtime.onMessage.addListener(
     function(message, sender, sendResponse) {
