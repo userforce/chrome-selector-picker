@@ -1,19 +1,51 @@
 @import url('https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap');
 .userforce_chrome_selector_picker {
-    -webkit-box-shadow: 0px 0px 0px 1px rgba(96,143,61,1);
-    box-shadow: 0px 0px 0px 1px rgba(96,143,61,1);
+    -webkit-box-shadow: 0px 0px 0px 3px rgba(91, 140, 62,1) !important;
+    box-shadow: 0px 0px 0px 3px rgba(91, 140, 62,1) !important;
+    z-index: 10000;
 }
-.tc_panel_wrapper {
-    background: #f8f8f8;
-    padding: 2px 10px 2px 2px;
-    position: fixed;
-    right: 0;
-    bottom: 0;
-    border-top: 1px solid #cccccc;
-    border-left: 1px solid #cccccc;
-    color: #555555;
-    z-index: 5000;
+.tc_panel{
+    padding: 0px 15px 0px 0px;
     font-family: 'Ubuntu Mono', monospace;
+    position: fixed;
+    right: 0px;
+    top: 10%;
+    z-index: 50000;
+    width: 300px;
+    height: 90%;
+    transition: right .45s linear;
+}
+.tc_panel.tc_panel_closed {
+    right: -295px;
+}
+.tc_panel, .tc_panel * {
+     -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+     box-sizing: border-box;
+ }
+ .tc_panel_scroll {
+     width: 300px;
+     position: absolute;
+     height: 100%;
+     overflow-y: auto;
+     right: 0;
+     top: 0;
+     padding: 0 15px 15px 0;
+     z-index: 1;
+ }
+ .tc_panel_scroll::-webkit-scrollbar {
+     width: 0 !important
+ }
+.tc_panel_wrapper {
+    padding: 2px 10px 2px 2px;
+    color: #555555;
+    width: 100%;
+    border-radius: 5px 5px 5px 5px;
+    -moz-border-radius: 5px 5px 5px 5px;
+    -webkit-border-radius: 5px 5px 5px 5px;
+    border: 1px solid #cccccc;
+    background: #ffffff;
+    padding: 15px;
 }
 .tc_panel_template {
     padding: 5px;
@@ -29,9 +61,134 @@
 .tc_panel_copy_button:hover {
     background: white;
 }
-.tc_panel_selector {
-
+.tc_panel_arrow {
+    position: absolute;
+    left: -30px;
+    top: 15px;
+    width: 31px;
+    padding: 10px 0px 8px 10px;
+    border-radius: 5px 0px 0px 5px;
+    -moz-border-radius: 5px 0px 0px 5px;
+    -webkit-border-radius: 5px 0px 0px 5px;
+    border: 1px solid #cccccc;
+    border-right: 0px;
+    background: #ffffff;
+    cursor: pointer;
+    z-index: 2;
+}
+.tc_panel_arrow.tc_panel_arrow_hide {
+    display: none;
+}
+.tc_panel_title {
+    font-size: 20px;
+    font-weight: bold;
+    padding: 5px 0 15px 0;
+    border-bottom: 1px solid #cccccc;
+    margin-bottom: 15px;
+}
+.tc_panel_variable {
+    height: 45px;
+    width: 100%;
+}
+.tc_panel_variable_name,
+.tc_panel_variable_value {
+    border: 1px solid #cccccc;
+    display: block;
+    float: left;
+    padding: 0 10px 0 10px;
+    height: 35px;
+    font-size: 14px;
+}
+.tc_panel_variable_name {
+    width: 70px;
+    border-right: 0;
+}
+.tc_panel_variable_value {
+    width: 170px;
+    border-radius: 0px 5px 5px 0px;
+    -moz-border-radius: 0px 5px 5px 0px;
+    -webkit-border-radius: 0px 5px 5px 0px;
+}
+.tc_panel_active_selector {
+    width: 13px;
+    overflow: hidden;
+    border: 1px solid #cccccc;
+    border-right: 0;
+    display: block;
+    height: 35px;
+    float: left;
+    border-radius: 5px 0px 0px 5px;
+    -moz-border-radius: 5px 0px 0px 5px;
+    -webkit-border-radius: 5px 0px 0px 5px;
+    position: relative;
+}
+.tc_panel_active_selector input,
+.tc_panel_active_selector_back {
+    display: block;
+    left: 0;
+    top: 0;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: #cccccc;
+}
+.tc_panel_active_selector input{
+    z-index: 2;
+    background: #5b8c3e;
+    opacity: 0;
+    cursor: pointer;
+}
+.tc_panel_active_selector input:checked {
+    background-color: #5b8c3e;
+}
+.tc_panel_active_selector_back{
+    z-index: 1;
+}
+.tc_panel_active_selector input:checked ~ .tc_panel_active_selector_back{
+    background-color: #5b8c3e;
+}
+.tc_panel_var_preview {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    padding: 15px;
+}
+.tc_panel_var_preview_wraper {
+    width: 100%;
+    position: relative;
+}
+.tc_panel_preview_name, .tc_panel_preview_value {
+    border: 1px solid #cccccc;
+    display: block;
+    padding: 5px 10px;
+    font-size: 14px;
+    width: 49.5%;
+    background: #ffffff;
+    border-radius: 5px 5px 5px 5px;
+    position: absolute;
+    bottom: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.tc_panel_preview_value {
+    right: 0;
+    width: 59.5%;
+}
+.tc_panel_preview_name {
+    left: 0;
+    width: 39.5%;
+}
+.tc_papnel_delimiter{
+    border-bottom: 1px solid #cccccc;
+    padding: 0 0 15px 0;
+    margin: 0 0 15px 0;
+    clear: both;
+}
+.pull-right {
+    float: right;
 }
 #tc_panel_template{
-
+    display: none;
 }

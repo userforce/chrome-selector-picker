@@ -12,6 +12,11 @@ var tc_highlighted_element = null;
 var tc_mouse_move_listener = null;
 var tc_contextmenu_listener = null;
 var tc_result = null;
+var arrow_close = null;
+var arrow_open = null;
+var this_panel = null;
+var panel_open = false;
+var selected_variable = null;
 
 // Add extension CSS to the DOM.
 var addCss = function() {
@@ -25,6 +30,35 @@ var removeCss = function() {
     removeEmbdded(CSS_ELEMENT_KEY);
 };
 
+var setResutlSelector = function(selector) {
+    document.querySelector('.tc_panel_preview_name').innerHTML = selector;
+};
+
+var setResutlValue = function(value) {
+    document.querySelector('.tc_panel_preview_value').innerHTML = value;
+};
+
+var insertVariableValue = function (variableValue) {
+    if (!!selected_variable) {
+        var variableChildNodes = selected_variable.childNodes;
+        for (var varElementIndex in variableChildNodes) {
+            var varElement = variableChildNodes[varElementIndex];
+            if (varElement.tagName) {
+                if (varElement.classList.contains('tc_panel_variable_value')) {
+                    varElement.value = variableValue;
+                }
+            }
+        }
+    }
+};
+
+var rememberVariableValue = function(event) {
+    if (!event.target.classList.contains('tc_ignore_highlighting')) {
+        var variableValue = findCurrentElementSelector().trim(' ');
+        insertVariableValue(variableValue);
+    }
+};
+
 // Then we are going to listen for the mouse move in currently open tab.
 // Here we will add specific css styles to visualy detect hovered element
 // and remember that element.
@@ -35,11 +69,16 @@ var showSelectedElement = function() {
                 if (tc_highlighted_element != null) tc_highlighted_element.classList.remove(CSS_CLASS_NAME);
                 tc_highlighted_element = e.srcElement;
                 tc_highlighted_element.classList.add(CSS_CLASS_NAME);
+                tc_current_element = tc_highlighted_element;
+                setResutlSelector(findCurrentElementSelector().trim(' '));
+                setResutlValue(tc_highlighted_element.textContent);
             }
         }
     };
     document.addEventListener('mousemove', tc_mouse_move_listener, false);
 };
+
+document.addEventListener('click', rememberVariableValue, false);
 
 var hideSelectedElement = function() {
     document.removeEventListener('mousemove', tc_mouse_move_listener);
@@ -64,28 +103,18 @@ var isContextMenuAction = function(message) {
     return message.hasOwnProperty('action');
 }
 
-
-
-
-
-
 var runContextMenuAction = function(message) {
-    if(isActionRequested(message, 'tc_cm_id_copy')) {
-
-    }
+    // if(isActionRequested(message, 'tc_cm_id_copy')) {
+    //
+    // }
     if (isActionRequested(message, 'tc_cm_id_save')) {
-        var panel_selector = document.querySelector('.tc_panel_selector');
-        if (!!panel_selector) {
-            panel_selector.innerHTML = findCurrentElementSelector().trim(' ');
-        }
+
+        // var panel_selector = document.querySelector('.tc_panel_selector');
+        // if (!!panel_selector) {
+        //     panel_selector.innerHTML = findCurrentElementSelector().trim(' ');
+        // }
     }
 };
-
-
-
-
-
-
 
 var findCurrentElementSelector = function(children = '') {
     if(!!tc_current_element.id) return ('#' + tc_current_element.id + children);
@@ -159,8 +188,51 @@ var removeEmbdded = function(key) {
     }
 };
 
+var togglePanel = function(event) {
+    panel_open = !panel_open;
+    if (panel_open) {
+        this_panel.classList.remove('tc_panel_closed');
+        arrow_close.classList.add('tc_panel_arrow_hide');
+        arrow_open.classList.remove('tc_panel_arrow_hide');
+    } else {
+        this_panel.classList.add('tc_panel_closed');
+        arrow_open.classList.add('tc_panel_arrow_hide');
+        arrow_close.classList.remove('tc_panel_arrow_hide');
+    }
+};
+
+var setActiveVariable = function(event) {
+    var clickedCheckbox = event.target;
+    var allCheckboxes = document.querySelectorAll('.tc_panel_active_selector input');
+    for (var ckb in allCheckboxes) {
+        allCheckboxes[ckb].checked = false;
+    }
+    clickedCheckbox.checked = true;
+    selected_variable = clickedCheckbox.parentNode.parentNode;
+};
+
 var addPanel = function() {
     embedFromResources(HTML_TEMPLATE_PANEL, 'div', 'body', CSS_ELEMENT_PANEL_KEY);
+    var waitPanel = setInterval(function() {
+        this_panel = document.querySelector('.tc_panel');
+        if (!!this_panel) {
+            clearInterval(waitPanel);
+            arrow_close = document.querySelector('.tc_panel_arrow_close');
+            arrow_open = document.querySelector('.tc_panel_arrow_open');
+            arrow_close.addEventListener('click', togglePanel, false);
+            arrow_open.addEventListener('click', togglePanel, false);
+            panel_open = false;
+            togglePanel();
+            var allCheckboxes = document.querySelectorAll('.tc_panel_active_selector input');
+            for (var ckb in allCheckboxes) {
+                if ( typeof allCheckboxes[ckb].addEventListener === 'function') {
+                    allCheckboxes[ckb].addEventListener('click', setActiveVariable, false);
+                }
+            }
+            var rememberButton = document.querySelectorAll('.tc_remember_variables');
+            rememberButton.addEventListener('click', saveVariables, false);
+        }
+    }, 500);
 };
 
 var removePanel = function() {
