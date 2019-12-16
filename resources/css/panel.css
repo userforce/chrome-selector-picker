@@ -9,10 +9,10 @@
     font-family: 'Ubuntu Mono', monospace;
     position: fixed;
     right: 0px;
-    top: 10%;
+    top: 20%;
     z-index: 50000;
     width: 300px;
-    height: 90%;
+    height: 80%;
     transition: right .45s linear;
 }
 .tc_panel.tc_panel_closed {
@@ -102,6 +102,7 @@
 .tc_panel_variable_name {
     width: 70px;
     border-right: 0;
+    background: #f8f8f8;
 }
 .tc_panel_variable_value {
     width: 170px;
@@ -152,7 +153,7 @@
     left: 0;
     bottom: 0;
     width: 100%;
-    padding: 15px;
+    padding: 0 315px 15px 15px;
 }
 .tc_panel_var_preview_wraper {
     width: 100%;
@@ -171,6 +172,7 @@
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+    text-align: left;
 }
 .tc_panel_preview_value {
     right: 0;
@@ -191,4 +193,28 @@
 }
 #tc_panel_template{
     display: none;
+}
+.tc_panel_simple_button {
+    font-size: 14px;
+    font-family: 'Ubuntu Mono', monospace;
+    border-radius: 5px 5px 5px 5px;
+    -moz-border-radius: 5px 5px 5px 5px;
+    -webkit-border-radius: 5px 5px 5px 5px;
+    border: 0 solid #000000;
+    background: #1976d2 !important;
+    color: #ffffff;
+    font-weight: normal;
+    padding: 5px 10px;
+}
+.tc_panel_button_white {
+    font-size: 14px;
+    font-family: 'Ubuntu Mono', monospace;
+    border-radius: 5px 5px 5px 5px;
+    -moz-border-radius: 5px 5px 5px 5px;
+    -webkit-border-radius: 5px 5px 5px 5px;
+    border: 1px solid #cccccc;
+    background: #f1f1f1 !important;
+    color: #555555;
+    font-weight: normal;
+    padding: 5px 10px;
 }

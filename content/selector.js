@@ -3,6 +3,7 @@ const CSS_RESOURCE_FILE = chrome.runtime.getURL("resources/css/panel.css");
 const CSS_ELEMENT_KEY = 'tc_panel_css';
 const HTML_TEMPLATE_PANEL = chrome.runtime.getURL("resources/html/panel.html");
 const CSS_ELEMENT_PANEL_KEY = 'tc_panel_element';
+const LOCAL_STORAGE_BAG = 'tc_panel_variables';
 
 var tc_styles_element = null;
 
@@ -17,6 +18,8 @@ var arrow_open = null;
 var this_panel = null;
 var panel_open = false;
 var selected_variable = null;
+
+var variables = {};
 
 // Add extension CSS to the DOM.
 var addCss = function() {
@@ -56,6 +59,7 @@ var rememberVariableValue = function(event) {
     if (!event.target.classList.contains('tc_ignore_highlighting')) {
         var variableValue = findCurrentElementSelector().trim(' ');
         insertVariableValue(variableValue);
+        saveVariables();
     }
 };
 
@@ -64,7 +68,11 @@ var rememberVariableValue = function(event) {
 // and remember that element.
 var showSelectedElement = function() {
     tc_mouse_move_listener = function(e) {
-        if(e.srcElement !== tc_highlighted_element && e.srcElement.tagName.toLowerCase() != 'html') {
+
+        // hardcoded !!!!!!!!!!!!!
+        var notSpyder = window.location.host !== 'spyder.test';
+
+        if(e.srcElement !== tc_highlighted_element && e.srcElement.tagName.toLowerCase() !== 'html' && notSpyder) {
             if ( !e.srcElement.classList.contains('tc_ignore_highlighting')) {
                 if (tc_highlighted_element != null) tc_highlighted_element.classList.remove(CSS_CLASS_NAME);
                 tc_highlighted_element = e.srcElement;
@@ -108,11 +116,7 @@ var runContextMenuAction = function(message) {
     //
     // }
     if (isActionRequested(message, 'tc_cm_id_save')) {
-
-        // var panel_selector = document.querySelector('.tc_panel_selector');
-        // if (!!panel_selector) {
-        //     panel_selector.innerHTML = findCurrentElementSelector().trim(' ');
-        // }
+        findCurrentElementSelector().trim(' ');
     }
 };
 
@@ -122,9 +126,8 @@ var findCurrentElementSelector = function(children = '') {
 };
 
 var detectNodeSelector = function(element, selector = '') {
-    elementSelector = '';
+    var elementSelector = '';
     if(hasValidParentNode(element)) {
-        var parentNode = element.parentNode;
         var orderNumber = findElementOrderNumber(element);
         var classSelector = findElementClassSelector(element);
         if (classSelector) {
@@ -137,12 +140,12 @@ var detectNodeSelector = function(element, selector = '') {
         selector = detectNodeSelector(element.parentNode, elementSelector);
     }
     return selector;
-}
+};
 
 var hasValidParentNode = function(node) {
     if (!!node.parentNode) {
         var parentTagName = node.parentNode.tagName.toLowerCase();
-        var parentIsRoot = (parentTagName == 'html');
+        var parentIsRoot = (parentTagName === 'html');
         return !parentIsRoot;
     }
     return false;
@@ -156,7 +159,7 @@ var findElementOrderNumber = function(element, order = 0) {
     } else {
         return order === 0 ? order : ++order;
     }
-}
+};
 
 var findElementClassSelector = function(element) {
     var classSelector = '';
@@ -164,10 +167,10 @@ var findElementClassSelector = function(element) {
     for(var index in classes) {
         if(!!classes[index]){
             classSelector += ('.' + classes[index])
-        };
+        }
     }
     return classSelector;
-}
+};
 
 var embedFromResources = function(template_path, element, parentSelector, key) {
     var parentElement = document.querySelector(parentSelector);
@@ -211,6 +214,82 @@ var setActiveVariable = function(event) {
     selected_variable = clickedCheckbox.parentNode.parentNode;
 };
 
+var getAvailableVariablesFrom = function (parentClass) {
+    var variables = [];
+    var variablesElements = document.querySelectorAll(parentClass + ' .tc_panel_variable');
+    for(var elIndex in variablesElements) {
+        if (typeof variablesElements[elIndex].tagName !== 'undefined') {
+            var name = variablesElements[elIndex].querySelector(' .tc_panel_variable_name').value;
+            var value = variablesElements[elIndex].querySelector(' .tc_panel_variable_value').value;
+            if (!!name && !!value) {
+                variables.push({ name: name, value: value });
+            }
+        }
+    }
+    return variables;
+};
+
+var saveVariables = function () {
+    variables = {
+        product: getAvailableVariablesFrom('#tc_panel_content_data_product'),
+        input: getAvailableVariablesFrom('#tc_panel_content_data_input'),
+    };
+    var jsonResult = JSON.stringify(variables);
+
+    // hardcoded !!!!!!!!!!!!!
+    var isSpyder = window.location.host === 'spyder.test';
+    if (isSpyder) {
+        localStorage.set(LOCAL_STORAGE_BAG, jsonResult);
+    }
+    chrome.storage.local.set({variables: jsonResult});
+};
+
+var syncVariables = function(newVariables) {
+    variables = newVariables;
+    setData('product', '#tc_panel_content_data_product .tc_panel_variable');
+    setData('input', '#tc_panel_content_data_input .tc_panel_variable');
+};
+var setData = function (dataKey, classSelector) {
+    var dataElements = document.querySelectorAll(classSelector);
+    for (var ElIndex in dataElements) {
+        if (typeof dataElements[ElIndex].tagName !== 'undefined') {
+            var isProductVars = dataKey === 'product';
+            setProductVariable(dataKey, dataElements[ElIndex], isProductVars);
+        }
+    }
+};
+var setProductVariable = function(type, element, isProductVars) {
+    for (var newIndex in variables[type]) {
+        var newVariable = variables[type][newIndex];
+        var name = element.querySelector(' .tc_panel_variable_name').value;
+        if (newVariable.name === name || !isProductVars) {
+            element.querySelector(' .tc_panel_variable_name').value = newVariable.name;
+            element.querySelector(' .tc_panel_variable_value').value = newVariable.value;
+        }
+    }
+};
+
+var addVariableElement = function (name, value) {
+    var cln = itm.cloneNode(true);
+};
+
+var removeInputVariables = function() {
+    var inputElements = document.querySelectorAll('#tc_panel_content_data_input .tc_panel_variable');
+    for (var inEl in inputElements) {
+        if (typeof inputElements[inEl].tagName !== 'undefined') {
+            inputElements[inEl].parentNode.removeChild(inputElements[inEl]);
+        }
+    }
+};
+
+var removeElement = function (elem) {
+    // elem.parentNode.removeChild(inputElements[inEl]);
+};
+
+var refreshVariableElements = function() {
+    removeInputVariables();
+};
+
 var addPanel = function() {
     embedFromResources(HTML_TEMPLATE_PANEL, 'div', 'body', CSS_ELEMENT_PANEL_KEY);
     var waitPanel = setInterval(function() {
@@ -229,8 +308,7 @@ var addPanel = function() {
                     allCheckboxes[ckb].addEventListener('click', setActiveVariable, false);
                 }
             }
-            var rememberButton = document.querySelectorAll('.tc_remember_variables');
-            rememberButton.addEventListener('click', saveVariables, false);
+            refreshVariableElements();
         }
     }, 500);
 };
@@ -244,14 +322,14 @@ var start = function() {
     setCurrentElement();
     showSelectedElement();
     addCss();
-}
+};
 
 var stop = function() {
     removePanel();
     removeCurrentElement();
     hideSelectedElement();
     removeCss();
-}
+};
 
 chrome.runtime.onMessage.addListener(
     function(message, sender, sendResponse) {
@@ -269,3 +347,8 @@ chrome.runtime.onMessage.addListener(
         return true;
     }
 );
+
+// Sync variables
+chrome.storage.onChanged.addListener(function(changes, namespace) {
+    syncVariables(JSON.parse(changes.variables.newValue));
+});
